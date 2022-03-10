@@ -15,9 +15,9 @@ pub trait Painter {
 
     fn clear(&mut self, clear_color: egui::Rgba);
 
-    fn paint_meshes(
+    fn paint_primitives(
         &mut self,
-        clipped_meshes: Vec<egui::ClippedMesh>,
+        clipped_primitives: Vec<egui::ClippedPrimitive>,
         pixels_per_point: f32,
     ) -> Result<(), JsValue>;
 
@@ -25,7 +25,7 @@ pub trait Painter {
 
     fn paint_and_update_textures(
         &mut self,
-        clipped_meshes: Vec<egui::ClippedMesh>,
+        clipped_primitives: Vec<egui::ClippedPrimitive>,
         pixels_per_point: f32,
         textures_delta: &egui::TexturesDelta,
     ) -> Result<(), JsValue> {
@@ -33,7 +33,7 @@ pub trait Painter {
             self.set_texture(*id, image_delta);
         }
 
-        self.paint_meshes(clipped_meshes, pixels_per_point)?;
+        self.paint_primitives(clipped_primitives, pixels_per_point)?;
 
         for &id in &textures_delta.free {
             self.free_texture(id);

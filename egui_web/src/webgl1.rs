@@ -9,7 +9,7 @@ use {
     },
 };
 
-use egui::{emath::vec2, epaint::Color32};
+use egui::{emath::vec2, epaint::Color32, epaint::MeshOrCallback};
 
 type Gl = WebGlRenderingContext;
 
@@ -370,9 +370,9 @@ impl crate::Painter for WebGlPainter {
         gl.clear(Gl::COLOR_BUFFER_BIT);
     }
 
-    fn paint_meshes(
+    fn paint_primitives(
         &mut self,
-        clipped_meshes: Vec<egui::ClippedMesh>,
+        clipped_primitives: Vec<egui::ClippedPrimitive>,
         pixels_per_point: f32,
     ) -> Result<(), JsValue> {
         let gl = &self.gl;
@@ -402,36 +402,47 @@ impl crate::Painter for WebGlPainter {
         let u_sampler_loc = gl.get_uniform_location(&self.program, "u_sampler").unwrap();
         gl.uniform1i(Some(&u_sampler_loc), 0);
 
-        for egui::ClippedMesh(clip_rect, mesh) in clipped_meshes {
-            if let Some(gl_texture) = self.get_texture(mesh.texture_id) {
-                gl.bind_texture(Gl::TEXTURE_2D, Some(gl_texture));
+        for egui::ClippedPrimitive {
+            clip_rect,
+            primitive,
+        } in clipped_primitives
+        {
+            let clip_min_x = pixels_per_point * clip_rect.min.x;
+            let clip_min_y = pixels_per_point * clip_rect.min.y;
+            let clip_max_x = pixels_per_point * clip_rect.max.x;
+            let clip_max_y = pixels_per_point * clip_rect.max.y;
+            let clip_min_x = clip_min_x.clamp(0.0, screen_size_pixels.x);
+            let clip_min_y = clip_min_y.clamp(0.0, screen_size_pixels.y);
+            let clip_max_x = clip_max_x.clamp(clip_min_x, screen_size_pixels.x);
+            let clip_max_y = clip_max_y.clamp(clip_min_y, screen_size_pixels.y);
+            let clip_min_x = clip_min_x.round() as i32;
+            let clip_min_y = clip_min_y.round() as i32;
+            let clip_max_x = clip_max_x.round() as i32;
+            let clip_max_y = clip_max_y.round() as i32;
 
-                let clip_min_x = pixels_per_point * clip_rect.min.x;
-                let clip_min_y = pixels_per_point * clip_rect.min.y;
-                let clip_max_x = pixels_per_point * clip_rect.max.x;
-                let clip_max_y = pixels_per_point * clip_rect.max.y;
-                let clip_min_x = clip_min_x.clamp(0.0, screen_size_pixels.x);
-                let clip_min_y = clip_min_y.clamp(0.0, screen_size_pixels.y);
-                let clip_max_x = clip_max_x.clamp(clip_min_x, screen_size_pixels.x);
-                let clip_max_y = clip_max_y.clamp(clip_min_y, screen_size_pixels.y);
-                let clip_min_x = clip_min_x.round() as i32;
-                let clip_min_y = clip_min_y.round() as i32;
-                let clip_max_x = clip_max_x.round() as i32;
-                let clip_max_y = clip_max_y.round() as i32;
+            // scissor Y coordinate is from the bottom
+            gl.scissor(
+                clip_min_x,
+                self.canvas.height() as i32 - clip_max_y,
+                clip_max_x - clip_min_x,
+                clip_max_y - clip_min_y,
+            );
 
-                // scissor Y coordinate is from the bottom
-                gl.scissor(
-                    clip_min_x,
-                    self.canvas.height() as i32 - clip_max_y,
-                    clip_max_x - clip_min_x,
-                    clip_max_y - clip_min_y,
-                );
-
-                for mesh in mesh.split_to_u16() {
-                    self.paint_mesh(&mesh)?;
+            match primitive {
+                MeshOrCallback::Callback(_) => {
+                    tracing::warn!("Custom rendering callbacks are not implemented for WebGL. Use the glow backend instead.");
                 }
-            } else {
-                tracing::warn!("WebGL: Failed to find texture {:?}", mesh.texture_id);
+                MeshOrCallback::Mesh(mesh) => {
+                    if let Some(gl_texture) = self.get_texture(mesh.texture_id) {
+                        gl.bind_texture(Gl::TEXTURE_2D, Some(gl_texture));
+
+                        for mesh in mesh.split_to_u16() {
+                            self.paint_mesh(&mesh)?;
+                        }
+                    } else {
+                        tracing::warn!("WebGL: Failed to find texture {:?}", mesh.texture_id);
+                    }
+                }
             }
         }
 
