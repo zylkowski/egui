@@ -18,12 +18,24 @@ impl PlotBounds {
         max: [-f64::INFINITY; 2],
     };
 
+    pub fn new(min: [f64; 2], max: [f64; 2]) -> Self {
+        Self { min, max }
+    }
+
     pub fn min(&self) -> [f64; 2] {
         self.min
     }
 
+    pub fn set_min(&mut self, min: [f64; 2]) {
+        self.min = min;
+    }
+
     pub fn max(&self) -> [f64; 2] {
         self.max
+    }
+
+    pub fn set_mmax(&mut self, max: [f64; 2]) {
+        self.max = max;
     }
 
     pub(crate) fn new_symmetrical(half_extent: f64) -> Self {

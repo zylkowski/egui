@@ -18,7 +18,7 @@ pub use legend::{Corner, Legend};
 
 mod items;
 mod legend;
-mod transform;
+pub mod transform;
 
 type LabelFormatterFn = dyn Fn(&str, &Value) -> String;
 type LabelFormatter = Option<Box<LabelFormatterFn>>;
@@ -760,6 +760,11 @@ impl PlotUi {
     /// not change until the plot is drawn.
     pub fn plot_bounds(&self) -> PlotBounds {
         *self.last_screen_transform.bounds()
+    }
+
+    /// Sets bounds for the plot.
+    pub fn set_plot_bounds(&mut self, bounds: PlotBounds) {
+        *self.last_screen_transform.bounds_mut() = bounds;
     }
 
     /// Returns `true` if the plot area is currently hovered.
