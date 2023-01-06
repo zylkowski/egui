@@ -152,6 +152,7 @@ pub fn set_clipboard_text(s: &str) {
             let future = wasm_bindgen_futures::JsFuture::from(promise);
             let future = async move {
                 if let Err(err) = future.await {
+                    #[cfg(feature = "tracing")]
                     tracing::error!("Copy/cut action denied: {:?}", err);
                 }
             };

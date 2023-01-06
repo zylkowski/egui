@@ -114,6 +114,7 @@ impl Painter {
         let shader_version = ShaderVersion::get(&gl);
         let is_webgl_1 = shader_version == ShaderVersion::Es100;
         let header = shader_version.version();
+        #[cfg(feature = "tracing")]
         tracing::debug!("Shader header: {:?}.", header);
         let srgb_support = gl.supported_extensions().contains("EXT_sRGB");
 
@@ -122,6 +123,7 @@ impl Painter {
             (ShaderVersion::Es300, _) | (ShaderVersion::Es100, true) => unsafe {
                 // Add sRGB support marker for fragment shader
                 if let Some(size) = pp_fb_extent {
+                    #[cfg(feature = "tracing")]
                     tracing::debug!("WebGL with sRGB enabled. Turning on post processing for linear framebuffer blending.");
                     // install post process to correct sRGB color:
                     (
@@ -134,6 +136,7 @@ impl Painter {
                         "#define SRGB_SUPPORTED",
                     )
                 } else {
+                    #[cfg(feature = "tracing")]
                     tracing::debug!("WebGL or OpenGL ES detected but PostProcess disabled because dimension is None");
                     (None, "")
                 }
@@ -404,6 +407,7 @@ impl Painter {
                         if let Some(callback) = callback.callback.downcast_ref::<CallbackFn>() {
                             (callback.f)(info, self);
                         } else {
+                            #[cfg(feature = "tracing")]
                             tracing::warn!("Warning: Unsupported render callback. Expected egui_glow::CallbackFn");
                         }
 
@@ -705,6 +709,7 @@ pub fn clear(gl: &glow::Context, screen_size_in_pixels: [u32; 2], clear_color: e
 impl Drop for Painter {
     fn drop(&mut self) {
         if !self.destroyed {
+            #[cfg(feature = "tracing")]
             tracing::warn!(
                 "You forgot to call destroy() on the egui glow painter. Resources will leak!"
             );

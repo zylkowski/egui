@@ -17,6 +17,7 @@ impl ShaderVersion {
         let shading_lang_string =
             unsafe { gl.get_parameter_string(glow::SHADING_LANGUAGE_VERSION) };
         let shader_version = Self::parse(&shading_lang_string);
+        #[cfg(feature = "tracing")]
         tracing::debug!(
             "Shader version: {:?} ({:?}).",
             shader_version,

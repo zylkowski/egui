@@ -18,6 +18,7 @@ pub fn load_memory(ctx: &egui::Context) {
                 *ctx.memory() = memory;
             }
             Err(err) => {
+                #[cfg(feature = "tracing")]
                 tracing::error!("Failed to parse memory RON: {}", err);
             }
         }
@@ -34,6 +35,7 @@ pub fn save_memory(ctx: &egui::Context) {
             local_storage_set("egui_memory_ron", &ron);
         }
         Err(err) => {
+            #[cfg(feature = "tracing")]
             tracing::error!("Failed to serialize memory as RON: {}", err);
         }
     }

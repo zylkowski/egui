@@ -31,7 +31,8 @@ pub use crate::table::*;
 macro_rules! log_err {
     ($fmt: literal, $($arg: tt)*) => {{
         #[cfg(feature = "tracing")]
-        tracing::error!($fmt, $($arg)*);
+        #[cfg(feature = "tracing")]
+tracing::error!($fmt, $($arg)*);
 
         #[cfg(not(feature = "tracing"))]
         eprintln!(
