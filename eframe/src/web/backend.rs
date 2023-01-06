@@ -443,6 +443,7 @@ fn start_runner(app_runner: AppRunner) -> Result<AppRunnerRef, JsValue> {
     let previous_hook = std::panic::take_hook();
     let panicked = runner_container.panicked;
     std::panic::set_hook(Box::new(move |panic_info| {
+        #[cfg(feature = "tracing")]
         tracing::info!("egui disabled all event handlers due to panic");
         panicked.store(true, SeqCst);
 

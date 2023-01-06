@@ -59,6 +59,7 @@ impl VertexArrayObject {
 
             Some(vao)
         } else {
+            #[cfg(feature = "tracing")]
             tracing::debug!("VAO not supported");
             None
         };
@@ -113,6 +114,7 @@ fn supports_vao(gl: &glow::Context) -> bool {
     const OPENGL_ES_PREFIX: &str = "OpenGL ES ";
 
     let version_string = unsafe { gl.get_parameter_string(glow::VERSION) };
+    #[cfg(feature = "tracing")]
     tracing::debug!("GL version: {:?}.", version_string);
 
     // Examples:
@@ -124,6 +126,7 @@ fn supports_vao(gl: &glow::Context) -> bool {
         if version_str.contains("1.0") {
             // need to test OES_vertex_array_object .
             let supported_extensions = gl.supported_extensions();
+            #[cfg(feature = "tracing")]
             tracing::debug!("Supported OpenGL extensions: {:?}", supported_extensions);
             supported_extensions.contains("OES_vertex_array_object")
         } else {
@@ -134,6 +137,7 @@ fn supports_vao(gl: &glow::Context) -> bool {
         if version_string.contains("2.0") {
             // need to test OES_vertex_array_object .
             let supported_extensions = gl.supported_extensions();
+            #[cfg(feature = "tracing")]
             tracing::debug!("Supported OpenGL extensions: {:?}", supported_extensions);
             supported_extensions.contains("OES_vertex_array_object")
         } else {
@@ -145,6 +149,7 @@ fn supports_vao(gl: &glow::Context) -> bool {
             // I found APPLE_vertex_array_object , GL_ATI_vertex_array_object ,ARB_vertex_array_object
             // but APPLE's and ATI's very old extension.
             let supported_extensions = gl.supported_extensions();
+            #[cfg(feature = "tracing")]
             tracing::debug!("Supported OpenGL extensions: {:?}", supported_extensions);
             supported_extensions.contains("ARB_vertex_array_object")
         } else {

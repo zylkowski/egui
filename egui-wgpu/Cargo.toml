@@ -38,7 +38,7 @@ egui = { version = "0.18.1", path = "../egui", default-features = false, feature
 ] }
 
 bytemuck = "1.7"
-tracing = { version = "0.1", default-features = false, features = ["std"] }
+tracing = { version = "0.1", default-features = false, optional = true, features = ["std"] }
 type-map = "0.5.0"
 wgpu = "0.13"
 

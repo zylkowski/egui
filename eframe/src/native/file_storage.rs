@@ -38,17 +38,19 @@ impl FileStorage {
     pub fn from_app_name(app_name: &str) -> Option<Self> {
         if let Some(proj_dirs) = directories_next::ProjectDirs::from("", "", app_name) {
             let data_dir = proj_dirs.data_dir().to_path_buf();
-            if let Err(err) = std::fs::create_dir_all(&data_dir) {
+            if let Err(_err) = std::fs::create_dir_all(&data_dir) {
+                #[cfg(feature = "tracing")]
                 tracing::warn!(
                     "Saving disabled: Failed to create app path at {:?}: {}",
                     data_dir,
-                    err
+                    _err
                 );
                 None
             } else {
                 Some(Self::from_ron_filepath(data_dir.join("app.ron")))
             }
         } else {
+            #[cfg(feature = "tracing")]
             tracing::warn!("Saving disabled: Failed to find path to data_dir.");
             None
         }
@@ -83,6 +85,7 @@ impl crate::Storage for FileStorage {
                 let file = std::fs::File::create(&file_path).unwrap();
                 let config = Default::default();
                 ron::ser::to_writer_pretty(file, &kv, config).unwrap();
+                #[cfg(feature = "tracing")]
                 tracing::trace!("Persisted to {:?}", file_path);
             });
 
@@ -102,8 +105,9 @@ where
             let reader = std::io::BufReader::new(file);
             match ron::de::from_reader(reader) {
                 Ok(value) => Some(value),
-                Err(err) => {
-                    tracing::warn!("Failed to parse RON: {}", err);
+                Err(_err) => {
+                    #[cfg(feature = "tracing")]
+                    tracing::warn!("Failed to parse RON: {}", _err);
                     None
                 }
             }

@@ -60,6 +60,7 @@ impl Clipboard {
             return match clipboard.load() {
                 Ok(text) => Some(text),
                 Err(err) => {
+                    #[cfg(feature = "tracing")]
                     tracing::error!("Paste error: {}", err);
                     None
                 }
@@ -70,8 +71,9 @@ impl Clipboard {
         if let Some(clipboard) = &mut self.arboard {
             return match clipboard.get_text() {
                 Ok(text) => Some(text),
-                Err(err) => {
-                    tracing::error!("Paste error: {}", err);
+                Err(_err) => {
+                    #[cfg(feature = "tracing")]
+                    tracing::error!("Paste error: {}", _err);
                     None
                 }
             };
@@ -98,8 +100,9 @@ impl Clipboard {
 
         #[cfg(feature = "arboard")]
         if let Some(clipboard) = &mut self.arboard {
-            if let Err(err) = clipboard.set_text(text) {
-                tracing::error!("Copy/Cut error: {}", err);
+            if let Err(_err) = clipboard.set_text(text) {
+                #[cfg(feature = "tracing")]
+                tracing::error!("Copy/Cut error: {}", _err);
             }
             return;
         }
@@ -112,8 +115,9 @@ impl Clipboard {
 fn init_arboard() -> Option<arboard::Clipboard> {
     match arboard::Clipboard::new() {
         Ok(clipboard) => Some(clipboard),
-        Err(err) => {
-            tracing::error!("Failed to initialize clipboard: {}", err);
+        Err(_err) => {
+            #[cfg(feature = "tracing")]
+            tracing::error!("Failed to initialize clipboard: {}", _err);
             None
         }
     }
@@ -136,6 +140,7 @@ fn init_smithay_clipboard(
         #[allow(unsafe_code)]
         Some(unsafe { smithay_clipboard::Clipboard::new(display) })
     } else {
+        #[cfg(feature = "tracing")]
         tracing::error!("Cannot initialize smithay clipboard without a display handle!");
         None
     }

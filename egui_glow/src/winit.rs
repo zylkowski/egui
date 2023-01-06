@@ -18,6 +18,7 @@ impl EguiGlow {
     ) -> Self {
         let painter = crate::Painter::new(gl, None, "")
             .map_err(|error| {
+                #[cfg(feature = "tracing")]
                 tracing::error!("error occurred in initializing painter:\n{}", error);
             })
             .unwrap();

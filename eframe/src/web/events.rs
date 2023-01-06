@@ -97,6 +97,7 @@ pub fn install_document_events(runner_container: &AppRunnerContainer) -> Result<
                 false
             };
 
+            // #[cfg(feature = "tracing")]
             // tracing::debug!(
             //     "On key-down {:?}, egui_wants_keyboard: {}, prevent_default: {}",
             //     event.key().as_str(),
@@ -467,6 +468,7 @@ pub fn install_canvas_events(runner_container: &AppRunnerContainer) -> Result<()
                             let last_modified = std::time::UNIX_EPOCH
                                 + std::time::Duration::from_millis(file.last_modified() as u64);
 
+                            #[cfg(feature = "tracing")]
                             tracing::debug!("Loading {:?} ({} bytes)…", name, file.size());
 
                             let future = wasm_bindgen_futures::JsFuture::from(file.array_buffer());
@@ -476,6 +478,7 @@ pub fn install_canvas_events(runner_container: &AppRunnerContainer) -> Result<()
                                 match future.await {
                                     Ok(array_buffer) => {
                                         let bytes = js_sys::Uint8Array::new(&array_buffer).to_vec();
+                                        #[cfg(feature = "tracing")]
                                         tracing::debug!(
                                             "Loaded {:?} ({} bytes).",
                                             name,
@@ -495,6 +498,7 @@ pub fn install_canvas_events(runner_container: &AppRunnerContainer) -> Result<()
                                         runner_lock.needs_repaint.repaint_asap();
                                     }
                                     Err(err) => {
+                                        #[cfg(feature = "tracing")]
                                         tracing::error!("Failed to read file: {:?}", err);
                                     }
                                 }

@@ -394,6 +394,7 @@ impl RenderPass {
                         rpass.set_vertex_buffer(0, vertex_buffer.buffer.slice(..));
                         rpass.draw_indexed(0..mesh.indices.len() as u32, 0, 0..1);
                     } else {
+                        #[cfg(feature = "tracing")]
                         tracing::warn!("Missing texture: {:?}", mesh.texture_id);
                     }
                 }
@@ -724,6 +725,7 @@ impl RenderPass {
                     let cbfn = if let Some(c) = callback.callback.downcast_ref::<CallbackFn>() {
                         c
                     } else {
+                        #[cfg(feature = "tracing")]
                         tracing::warn!("Unknown paint callback: expected `egui_gpu::CallbackFn`");
                         continue;
                     };

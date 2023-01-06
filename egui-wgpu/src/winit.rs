@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use egui::mutex::RwLock;
+#[cfg(feature = "tracing")]
 use tracing::error;
 use wgpu::{Adapter, Instance, Surface, TextureFormat};
 
@@ -238,6 +239,7 @@ impl<'a> Painter<'a> {
                 return;
             }
             Err(e) => {
+                #[cfg(feature = "tracing")]
                 tracing::warn!("Dropped frame with error: {e}");
                 return;
             }
